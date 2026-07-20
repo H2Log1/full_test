@@ -38,6 +38,9 @@
 #include "multi_button.h"
 #include "Emm_V5.h"
 #include "pid.h"
+#include "hwt.h"
+#include "lcd_fonts.h"
+#include "lcd_spi_200.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -128,8 +131,14 @@ int main(void)
   
   Tim_Init();
   Motor_Init();
+  SPI_LCD_Init();
   PidInit(&motor_pid, POSITION_PID, 4500, 3000, 2.0f, PID_K[0],PID_K[1],PID_K[2]);
   key();
+
+  LCD_SetColor(LCD_CYAN);
+  LCD_DisplayString(200, 200, "Hello LCD!");
+  LCD_DisplayString(0, 10, "yaw:");
+  LCD_DisplayDecimals(50,10,yaw,6,2);
 
 
 
@@ -218,10 +227,10 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
         static uint8_t RxIndex;
         static uint8_t RxPacket[128];
         static enum{
-            Wait_Head, //等待包头
-		    Wait_Flag, //等待接收标识
-		    Wait_Data  //等待接收数据
-	    }RxState=Wait_Head;//初始状�?�为等待�????
+          Wait_Head, //等待包头
+		      Wait_Flag, //等待接收标识
+		      Wait_Data  //等待接收数据
+	      }RxState=Wait_Head;//初始状�?�为等待�????
             
         static enum{
             CMD_NONE,  //空状�????
@@ -310,6 +319,56 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
         }
         HAL_UART_Receive_IT(&huart3,&RxData,1);
     }
+
+
+  if (huart->Instance == USART1)
+  {    
+
+    static uint8_t buf[FRAME_SIZE];
+    static uint8_t idx = 0;
+    static uint8_t step = 0;
+
+    switch (step)
+    {
+      case 0:
+          if (rx_byte == 0x55)
+          {
+              buf[0] = 0x55;
+              step = 1;
+          }
+          break;
+
+      case 1:
+          if (rx_byte == 0x53)
+          {
+              buf[1] = 0x53;
+              idx = 2;
+              step = 2;
+          }
+          else if (rx_byte == 0x55)
+          {
+              buf[0] = 0x55;
+          }
+          else
+          {
+              step = 0;
+          }
+          break;
+
+      default:
+          buf[idx++] = rx_byte;
+          if (idx >= FRAME_SIZE) 
+          {
+              ParseYaw(buf, &yaw);
+              step = 0;
+          }
+          break;
+    }
+  
+  LCD_DisplayDecimals(10,10,yaw,6,2);
+  HAL_UART_Receive_IT(&huart1, &rx_byte, 1);
+  }
+
 }
 
 

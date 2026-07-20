@@ -46,6 +46,9 @@ Bsp/Src/Emm_V5.c \
 Bsp/Src/motor.c \
 Bsp/Src/multi_button.c \
 Bsp/Src/pid.c \
+Bsp/Src/hwt.c \
+Bsp/Src/lcd_fonts.c \
+Bsp/Src/lcd_spi_200.c \
 App/Src/init.c \
 App/Src/key.c \
 Core/Src/stm32f4xx_it.c \
