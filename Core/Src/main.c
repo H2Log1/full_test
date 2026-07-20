@@ -27,6 +27,8 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "stdio.h"
+#include "stdlib.h"
 // app
 #include "init.h"
 #include "key.h"
@@ -68,6 +70,14 @@ void MX_FREERTOS_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+  uint8_t RxData;
+  float PID_K[3]={1.0,1.0,1.0};
+
+  int _write(int file, char *ptr, int len)
+  {
+      HAL_UART_Transmit(&huart3, (uint8_t*)ptr, len, HAL_MAX_DELAY);
+      return len;
+  }
 
 /* USER CODE END 0 */
 
@@ -77,7 +87,6 @@ void MX_FREERTOS_Init(void);
   */
 int main(void)
 {
-
   /* USER CODE BEGIN 1 */
 
   /* USER CODE END 1 */
@@ -116,24 +125,26 @@ int main(void)
   MX_TIM6_Init();
   /* USER CODE BEGIN 2 */
 
+  
   Tim_Init();
   Motor_Init();
-  PidInit(&motor_pid, POSITION_PID, 4500, 3000, 2.0f, 1.0f, 1.0f, 1.0f);
+  PidInit(&motor_pid, POSITION_PID, 4500, 3000, 2.0f, PID_K[0],PID_K[1],PID_K[2]);
   key();
 
+
+
+
+  HAL_UART_Receive_IT(&huart3,&RxData,1);
   /* USER CODE END 2 */
 
   /* Init scheduler */
-  osKernelInitialize();
-
-  /* Call init function for freertos objects (in cmsis_os2.c) */
+  osKernelInitialize();  /* Call init function for freertos objects (in freertos.c) */
   MX_FREERTOS_Init();
 
   /* Start scheduler */
   osKernelStart();
 
   /* We should never get here as control is now taken by the scheduler */
-
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
@@ -199,6 +210,109 @@ void SystemClock_Config(void)
 
 /* USER CODE BEGIN 4 */
 
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+{
+
+    if (huart == &huart3)
+    {
+        static uint8_t RxIndex;
+        static uint8_t RxPacket[128];
+        static enum{
+            Wait_Head, //等待包头
+		    Wait_Flag, //等待接收标识
+		    Wait_Data  //等待接收数据
+	    }RxState=Wait_Head;//初始状�?�为等待�????
+            
+        static enum{
+            CMD_NONE,  //空状�????
+            CMD_Kp,    //Kp
+            CMD_Ki,    //Ki
+            CMD_Kd     //Kd
+        }CurrentCmd=CMD_NONE; //初始为空状�??
+            
+        switch(RxState)
+        {
+            case Wait_Head:
+                if(RxData=='K')
+                {
+                    RxState=Wait_Flag;
+                }
+                break;
+            case Wait_Flag:
+                if(RxData=='P')
+                {
+                    CurrentCmd=CMD_Kp;
+                    RxState=Wait_Data;
+                    RxIndex=0;
+                }
+                else if(RxData=='I')
+                {
+                    CurrentCmd=CMD_Ki;
+                    RxState=Wait_Data;
+                    RxIndex=0;
+                }
+                else if(RxData=='D')
+                {
+                    CurrentCmd=CMD_Kd;
+                    RxState=Wait_Data;
+                    RxIndex=0;
+                }
+                else
+                    RxState=Wait_Head;
+                break;
+
+            case Wait_Data:
+                if(RxData=='M')
+                {
+                    RxPacket[RxIndex]='\0';
+                    uint8_t *endptr;
+                    float NewValue = strtof((char*)RxPacket, (char**)&endptr);  // 双重转换
+                    if(endptr!=RxPacket && *endptr == '\0') 
+                    {
+                        switch(CurrentCmd)
+                        {
+                            case CMD_Kp:
+                                PID_K[0]=NewValue;
+                                // printf("Kp updated:%.2f\n",PID_K[0]);
+                                break;
+                            case CMD_Ki:
+                                PID_K[1]=NewValue;
+                                // printf("Ki updated:%.2f\n",PID_K[1]);
+                                break;
+                            case CMD_Kd:
+                                PID_K[2]=NewValue;
+                                // printf("Kd updated:%.2f\n",PID_K[2]);
+                                break;
+                            case CMD_NONE:
+                                break;
+                        }
+                    }
+                    else
+                        // printf("Error:%s\n",RxPacket);
+                    RxState=Wait_Head;
+                    CurrentCmd=CMD_NONE;
+                }
+                else
+                {
+                    if(RxIndex<sizeof(RxPacket)-1)
+                    {
+                        RxPacket[RxIndex++]=RxData;
+                    }
+                    else
+                    {
+                        RxState=Wait_Head;
+                    }
+                }
+                break;
+            default:
+                RxState = Wait_Head;
+                break;
+        }
+        HAL_UART_Receive_IT(&huart3,&RxData,1);
+    }
+}
+
+
 /* USER CODE END 4 */
 
 /**
@@ -233,9 +347,14 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   {
     Get_Motor_Speed(&motor[0].now_vel, &htim2);
     Get_Motor_Speed(&motor[1].now_vel, &htim3);
+    printf("Speed0:%.2f\n", motor[0].now_vel);
+    // printf("Speed1:%.2f\n", motor[1].now_vel);
   }
   else if (htim->Instance == TIM5) // 10ms
   {
+    motor_pid.p=PID_K[0];
+    motor_pid.i=PID_K[1];
+    motor_pid.d=PID_K[2];
     float pid_output = PidCalc(&motor_pid, motor[0].now_vel, motor[0].target_vel);
     Motor_Set_Vel((int16_t)pid_output);
   }
