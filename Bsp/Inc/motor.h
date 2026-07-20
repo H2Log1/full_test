@@ -16,6 +16,5 @@ void Get_Motor_Speed(double *now_vel, TIM_HandleTypeDef *htim);
 int getTIMx_DetaCnt(TIM_HandleTypeDef *htim);
 
 extern MOTOR motor[2];
-extern Pid_t motor_pid;
 
 #endif // MOTOR_H

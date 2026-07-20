@@ -46,6 +46,8 @@ Bsp/Src/Emm_V5.c \
 Bsp/Src/motor.c \
 Bsp/Src/multi_button.c \
 Bsp/Src/pid.c \
+App/Src/init.c \
+App/Src/key.c \
 Core/Src/stm32f4xx_it.c \
 Core/Src/stm32f4xx_hal_msp.c \
 Core/Src/stm32f4xx_hal_timebase_tim.c \

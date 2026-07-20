@@ -3,8 +3,10 @@
 
 #include "tim.h"
 #include "multi_button.h"
+#include "pid.h"
 
 void Tim_Init(void);
-void PID_Init(void);
+
+extern Pid_t motor_pid;
 
 #endif // !INIT_H

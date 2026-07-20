@@ -1,6 +1,7 @@
 #include "main.h"
 #include "key.h"
 #include "multi_button.h"
+#include "motor.h"
 
 uint8_t read_button_gpio(uint8_t button_id)
 {
@@ -21,7 +22,7 @@ uint8_t read_button_gpio(uint8_t button_id)
 
 void btn_single_click_handler(Button *btn, void *user_data)
 {
-    // printf("Button 1: Single Click\n");
+    Motor_Set_Vel(1500);
 }
 
 void key(void)
