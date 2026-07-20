@@ -1,0 +1,44 @@
+#include "main.h"
+#include "key.h"
+#include "multi_button.h"
+
+uint8_t read_button_gpio(uint8_t button_id)
+{
+    switch (button_id)
+    {
+    case 1:
+        return HAL_GPIO_ReadPin(BUTTON12_GPIO_Port, BUTTON1_Pin);
+    case 2:
+        return HAL_GPIO_ReadPin(BUTTON12_GPIO_Port, BUTTON2_Pin);
+    case 3:
+        return HAL_GPIO_ReadPin(BUTTON34_GPIO_Port, BUTTON3_Pin);
+    case 4:
+        return HAL_GPIO_ReadPin(BUTTON34_GPIO_Port, BUTTON4_Pin);
+    default:
+        return 0;
+    }
+}
+
+void btn_single_click_handler(Button *btn, void *user_data)
+{
+    // printf("Button 1: Single Click\n");
+}
+
+void key(void)
+{
+    static Button key[4];
+    for (int i = 0; i < 4; i++)
+    {
+        button_init(&key[i], read_button_gpio, 0, i + 1);
+    }
+
+    button_attach(&key[0], BTN_SINGLE_CLICK, btn_single_click_handler, NULL);
+    button_attach(&key[1], BTN_SINGLE_CLICK, btn_single_click_handler, NULL);
+    button_attach(&key[2], BTN_SINGLE_CLICK, btn_single_click_handler, NULL);
+    button_attach(&key[3], BTN_SINGLE_CLICK, btn_single_click_handler, NULL);
+
+    for (int j = 0; j < 4; j++)
+    {
+        button_start(&key[j]);
+    }
+}
