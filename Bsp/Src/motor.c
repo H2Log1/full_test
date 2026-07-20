@@ -26,18 +26,18 @@ void Motor_Stop(void)
     HAL_GPIO_WritePin(MOTOR_ENABLE_GPIO, MOTOR_ENABLE_PIN, GPIO_PIN_RESET);
 }
 
-void Motor_Set_Vel(int16_t motor_vel)
+void Motor_Set_Vel(int16_t delta_motor_vel)
 {
-    if (motor_vel > 8999)
+    if (delta_motor_vel > 4500)
     {
-        motor_vel = 8999;
+        delta_motor_vel = 4500;
     }
-    else if (motor_vel < 0)
+    else if (delta_motor_vel < -4500)
     {
-        motor_vel = 0;
+        delta_motor_vel = -4500;
     }
-    __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, motor_vel);
-    __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, motor_vel);
+    __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 4500 + delta_motor_vel);
+    __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, 4500 - delta_motor_vel);
 }
 
 int getTIMx_DetaCnt(TIM_HandleTypeDef *htim)

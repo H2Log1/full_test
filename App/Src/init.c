@@ -17,3 +17,10 @@ void Tim_Init(void)
     HAL_TIM_Base_Start_IT(&htim5);
     HAL_TIM_Base_Start_IT(&htim6); // 中断 1ms
 }
+
+void PID_Init(void)
+{
+    Pid_t motor_pid;
+
+    PidInit(&motor_pid, POSITION_PID, 4500, 3000, 2.0f, 1.0f, 1.0f, 1.0f);
+}

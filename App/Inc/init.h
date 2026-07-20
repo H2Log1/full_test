@@ -5,5 +5,6 @@
 #include "multi_button.h"
 
 void Tim_Init(void);
+void PID_Init(void);
 
 #endif // !INIT_H
