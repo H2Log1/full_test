@@ -51,6 +51,7 @@ Bsp/Src/lcd_fonts.c \
 Bsp/Src/lcd_spi_200.c \
 App/Src/init.c \
 App/Src/key.c \
+App/Src/gimbal.c \
 Core/Src/stm32f4xx_it.c \
 Core/Src/stm32f4xx_hal_msp.c \
 Core/Src/stm32f4xx_hal_timebase_tim.c \
