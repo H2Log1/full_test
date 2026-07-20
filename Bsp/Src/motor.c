@@ -10,8 +10,8 @@
 #define MOTOR_BIPOLAR_PIN GPIO_PIN_12
 
 MOTOR motor[2] = {
-    {0.0, 100.0},
-    {0.0, 100.0}};
+    {0.0, 0.0},
+    {0.0, 0.0}};
 
 void Motor_Init(void)
 {
