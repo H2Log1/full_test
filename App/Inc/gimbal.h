@@ -8,6 +8,7 @@
 typedef struct
 {
     int16_t addr;
+    int16_t dir;
     int16_t vel;
     int16_t round;
     bool state;
@@ -15,8 +16,8 @@ typedef struct
 } GIMBAL;
 
 GIMBAL gimbal[2] = {
-    {0x01, 0, 0, true, false},
-    {0x02, 0, 0, true, false}};
+    {0x01, 0, 0, 0, true, false},
+    {0x02, 0, 0, 0, true, false}};
 
 void Gimbal_Init(void);
 extern GIMBAL gimbal[2];
