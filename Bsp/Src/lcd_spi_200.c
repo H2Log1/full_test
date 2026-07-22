@@ -118,14 +118,14 @@ void SPI_LCD_Init(void)
 
    LCD_SetDirection(Direction_H_Flip);
    LCD_SetBackColor(LCD_BLACK);
-   LCD_SetColor(LCD_WHITE);
+   LCD_SetColor(LCD_CYAN);
    LCD_Clear();
 
    LCD_SetAsciiFont(&ASCII_Font24);
    LCD_ShowNumMode(Fill_Zero);
 
-
    LCD_Backlight_ON;
+   LCD_DisplayString(200, 200, "Hello LCD!");
 	
 }
 /* Write 8-bit command to LCD */

@@ -15,6 +15,6 @@ void Motor_Set_Vel(int16_t motor_vel);
 void Get_Motor_Speed(double *now_vel, TIM_HandleTypeDef *htim);
 int getTIMx_DetaCnt(TIM_HandleTypeDef *htim);
 
-extern MOTOR motor[2];
+extern MOTOR motor_speed[2];
 
 #endif // MOTOR_H

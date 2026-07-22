@@ -9,7 +9,7 @@
 #define MOTOR_BIPOLAR_GPIO GPIOB
 #define MOTOR_BIPOLAR_PIN GPIO_PIN_12
 
-MOTOR motor[2] = {
+MOTOR motor_speed[2] = {
     {0.0, 0.0},
     {0.0, 0.0}};
 
@@ -26,7 +26,7 @@ void Motor_Stop(void)
     HAL_GPIO_WritePin(MOTOR_ENABLE_GPIO, MOTOR_ENABLE_PIN, GPIO_PIN_RESET);
 }
 
-void Motor_Set_Vel(int16_t delta_motor_vel)
+void Motor_Set_Vel_1(int16_t delta_motor_vel)
 {
     if (delta_motor_vel > 4500)
     {
@@ -37,8 +37,23 @@ void Motor_Set_Vel(int16_t delta_motor_vel)
         delta_motor_vel = -4500;
     }
     __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 4500 + delta_motor_vel);
-    __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, 4500 - delta_motor_vel);
+    // __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, 4500 - delta_motor_vel);
 }
+
+void Motor_Set_Vel_2(int16_t delta_motor_vel)
+{
+    if (delta_motor_vel > 4500)
+    {
+        delta_motor_vel = 4500;
+    }
+    else if (delta_motor_vel < -4500)
+    {
+        delta_motor_vel = -4500;
+    }
+    __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, 4500 + delta_motor_vel);
+    // __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, 4500 - delta_motor_vel);
+}
+
 
 int getTIMx_DetaCnt(TIM_HandleTypeDef *htim)
 {

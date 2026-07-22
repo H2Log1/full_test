@@ -7,6 +7,6 @@
 
 void Tim_Init(void);
 
-extern Pid_t motor_pid;
+extern Pid_t motor_pid[2];
 
 #endif // !INIT_H

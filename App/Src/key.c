@@ -22,25 +22,25 @@ uint8_t read_button_gpio(uint8_t button_id)
 
 void btn1_single_click_handler(Button *btn, void *user_data)
 {
-    motor[0].target_vel = 50.0;
+    motor_speed[0].target_vel = 50.0;
     HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_2);
 }
 
 void btn2_single_click_handler(Button *btn, void *user_data)
 {
-    motor[0].target_vel = 100.0;
+    motor_speed[0].target_vel = 100.0;
     HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_3);
 }
 
 void btn3_single_click_handler(Button *btn, void *user_data)
 {
-    motor[0].target_vel = 200.0;
+    motor_speed[0].target_vel = 200.0;
     HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_4);
 }
 
 void btn4_single_click_handler(Button *btn, void *user_data)
 {
-    motor[0].target_vel = 300.0;
+    motor_speed[0].target_vel = 300.0;
     HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_5);
 }
 

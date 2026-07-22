@@ -19,4 +19,4 @@ void Tim_Init(void)
     HAL_TIM_Base_Start_IT(&htim9);
 }
 
-Pid_t motor_pid;
+Pid_t motor_pid[2];  /*1,2电机速度环pid参数源头*/  
