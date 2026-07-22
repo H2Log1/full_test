@@ -2,6 +2,7 @@
 #include "tim.h"
 #include "init.h"
 #include "pid.h"
+#include "filter.h"
 
 void Tim_Init(void)
 {
@@ -19,4 +20,6 @@ void Tim_Init(void)
     HAL_TIM_Base_Start_IT(&htim9);
 }
 
-Pid_t motor_pid[2];  /*1,2电机速度环pid参数源头*/  
+Pid_t motor_pid[2]; /*1,2电机速度环pid参数源头*/
+
+MoveAverageFilter speed_filter[2];

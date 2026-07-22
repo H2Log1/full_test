@@ -1,25 +1,27 @@
 #include "filter.h"
 #include "arm_math.h"
 
-// 平滑均值滤波
-#define moveAverage_N 16
-float value_buf[moveAverage_N];
-float sum = 0;
-uint8_t curNum = 0;
-
-float moveAverageFilter_Distance(uint32_t newValue)
+float moveAverageFilter_Update(MoveAverageFilter *filter, float newValue)
 {
-    if (curNum < moveAverage_N)
+    if (filter->curNum < moveAverage_N)
     {
-        value_buf[curNum] = (float)newValue;
-        sum += newValue;
-        curNum++;
-        return sum / curNum;
+
+        filter->value_buf[filter->curNum] = newValue;
+        filter->sum += newValue;
+        filter->curNum++;
+        return filter->sum / filter->curNum;
     }
+
     else
     {
-        sum -= sum / moveAverage_N; // 减去上一次的平均值
-        sum += newValue;
-        return sum / moveAverage_N;
+        filter->sum -= filter->value_buf[0];
+        for (int i = 0; i < moveAverage_N - 1; i++)
+        {
+            filter->value_buf[i] =
+                filter->value_buf[i + 1];
+        }
+        filter->value_buf[moveAverage_N - 1] = newValue;
+        filter->sum += newValue;
+        return filter->sum / moveAverage_N;
     }
 }

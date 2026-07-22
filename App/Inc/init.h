@@ -4,9 +4,11 @@
 #include "tim.h"
 #include "multi_button.h"
 #include "pid.h"
+#include "filter.h"
 
 void Tim_Init(void);
 
 extern Pid_t motor_pid[2];
+extern MoveAverageFilter speed_filter[2];
 
 #endif // !INIT_H
