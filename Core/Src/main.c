@@ -372,6 +372,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
   }
 }
 
+volatile uint8_t speed_update_flag = 0;
 /* USER CODE END 4 */
 
 /**
@@ -385,7 +386,6 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
   /* USER CODE BEGIN Callback 0 */
-  volatile uint8_t speed_update_flag = 0;
 
   /* USER CODE END Callback 0 */
   if (htim->Instance == TIM7)
