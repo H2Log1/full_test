@@ -385,6 +385,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
   /* USER CODE BEGIN Callback 0 */
+  volatile uint8_t speed_update_flag = 0;
 
   /* USER CODE END Callback 0 */
   if (htim->Instance == TIM7)
@@ -402,7 +403,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     Get_Motor_Speed(&motor_speed[1].now_vel, &htim3);
     motor_speed[0].now_vel = moveAverageFilter_Update(&speed_filter[0], motor_speed[0].now_vel);
     motor_speed[1].now_vel = moveAverageFilter_Update(&speed_filter[1], motor_speed[1].now_vel);
-    printf("Speed_1,Speed_2,pos_out:%.2f,%.2f,%.2f\n", motor_speed[0].now_vel, motor_speed[1].now_vel, motor_pid[0].pos_out);
+    speed_update_flag = 1;
+    // printf("Speed_1,Speed_2,pos_out:%.2f,%.2f,%.2f\n", motor_speed[0].now_vel, motor_speed[1].now_vel, motor_pid[0].pos_out);
     motor_pid[0].p = PID_K[0];
     motor_pid[0].i = PID_K[1];
     motor_pid[0].d = PID_K[2];
@@ -415,9 +417,13 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     Motor_Set_Vel_2((int16_t)pid_output_2);
   }
 
-  else if (htim->Instance == TIM5) // 10ms  改变pid数�?�并进行pid环计算输出�??
+  else if (htim->Instance == TIM5) // 10ms
   {
-    // motor_pid[0].p = PID_K[0];
+    if (speed_update_flag == 1)
+    {
+      speed_update_flag = 0;
+      printf("Speed_1,Speed_2,pos_out:%.2f,%.2f,%.2f\n", motor_speed[0].now_vel, motor_speed[1].now_vel, motor_pid[0].pos_out);
+    }
     // motor_pid[0].i = PID_K[1];
     // motor_pid[0].d = PID_K[2];
     // motor_pid[1].p = PID_K[0];
