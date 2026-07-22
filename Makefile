@@ -43,12 +43,12 @@ Core/Src/spi.c \
 Core/Src/tim.c \
 Core/Src/usart.c \
 Bsp/Src/Emm_V5.c \
-Bsp/Src/motor.c \
 Bsp/Src/multi_button.c \
 Bsp/Src/pid.c \
 Bsp/Src/hwt.c \
 Bsp/Src/lcd_fonts.c \
 Bsp/Src/lcd_spi_200.c \
+App/Src/motor.c \
 App/Src/init.c \
 App/Src/key.c \
 App/Src/gimbal.c \
