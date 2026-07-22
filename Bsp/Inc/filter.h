@@ -3,7 +3,7 @@
 
 #include "main.h"
 
-#define moveAverage_N 16
+#define moveAverage_N 4
 typedef struct MoveAverageFilter
 {
     float value_buf[moveAverage_N];

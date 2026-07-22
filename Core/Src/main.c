@@ -78,7 +78,8 @@ void MX_FREERTOS_Init(void);
 uint8_t RxData; /*用于�?启hwt中断回调*/
 // float PID_K[3]={0.0,0.5,0.0};/*pid数组初始定义*/
 // float PID_K[3]={15.0,0.2,0.0};
-float PID_K[3] = {10.0, 0.5, 0.0};
+// float PID_K[3] = {10.0, 0.5, 0.0};
+float PID_K[3] = {10.0, 2.0, 0.0};
 
 /*串口发?函?*/
 int _write(int file, char *ptr, int len)
@@ -137,8 +138,8 @@ int main(void)
   Motor_Init();   /*4500占空比，双极性，使能*/
   SPI_LCD_Init(); /*lcd屏幕启动*/
   /*�?启第�?个motor的pid�?*/
-  PidInit(&motor_pid[0], POSITION_PID, 4500, 3000, 2.0f, PID_K[0], PID_K[1], PID_K[2]);
-  PidInit(&motor_pid[1], POSITION_PID, 4500, 3000, 2.0f, PID_K[0], PID_K[1], PID_K[2]);
+  PidInit(&motor_pid[0], POSITION_PID, 4500, 3000, 0.0f, PID_K[0], PID_K[1], PID_K[2]);
+  PidInit(&motor_pid[1], POSITION_PID, 4500, 3000, 0.0f, PID_K[0], PID_K[1], PID_K[2]);
   motor_speed[0].target_vel = 300.0;
   motor_speed[1].target_vel = 100.0;
 
