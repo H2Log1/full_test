@@ -75,7 +75,7 @@ void MX_FREERTOS_Init(void);
 /* USER CODE BEGIN 0 */
 
   uint8_t RxData;/*用于开启hwt中断回调*/
-  float PID_K[3]={1.0,1.0,1.0};/*pid数组初始定义*/
+  float PID_K[3]={1.0,0.0,0.0};/*pid数组初始定义*/
 
   /*串口发送函数*/
   int _write(int file, char *ptr, int len)
@@ -135,9 +135,11 @@ int main(void)
   Motor_Init();/*4500占空比，双极性，使能*/
   SPI_LCD_Init();/*lcd屏幕启动*/
   /*开启第一个motor的pid环*/
+  PidInit(&motor_pid[0], POSITION_PID, 4500, 3000, 2.0f, PID_K[0],PID_K[1],PID_K[2]);
   PidInit(&motor_pid[1], POSITION_PID, 4500, 3000, 2.0f, PID_K[0],PID_K[1],PID_K[2]);
-  PidInit(&motor_pid[2], POSITION_PID, 4500, 3000, 2.0f, PID_K[0],PID_K[1],PID_K[2]);
-
+  motor_speed[0].target_vel = 300.0;
+  motor_speed[1].target_vel = 100.0;
+ 
 
   /*按键*/
   key();
@@ -408,8 +410,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   {
     Get_Motor_Speed(&motor_speed[0].now_vel, &htim2);
     Get_Motor_Speed(&motor_speed[1].now_vel, &htim3);
-    printf("Speed_1:%.2f\n", motor_speed[0].now_vel);
-    printf("Speed_2:%.2f\n", motor_speed[1].now_vel);
+    printf("Speed_1,Speed_2:%.2f,%.2f\n", motor_speed[0].now_vel, motor_speed[1].now_vel);
   }
 
   else if (htim->Instance == TIM5) // 10ms  改变pid数值并进行pid环计算输出值 
