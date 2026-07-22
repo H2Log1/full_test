@@ -75,7 +75,9 @@ void MX_FREERTOS_Init(void);
 /* USER CODE BEGIN 0 */
 
   uint8_t RxData;/*用于开启hwt中断回调*/
-  float PID_K[3]={1.0,0.0,0.0};/*pid数组初始定义*/
+  // float PID_K[3]={0.0,0.5,0.0};/*pid数组初始定义*/
+  // float PID_K[3]={15.0,0.2,0.0};
+  float PID_K[3]={10.0,0.5,0.0};
 
   /*串口发送函数*/
   int _write(int file, char *ptr, int len)
@@ -410,7 +412,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   {
     Get_Motor_Speed(&motor_speed[0].now_vel, &htim2);
     Get_Motor_Speed(&motor_speed[1].now_vel, &htim3);
-    printf("Speed_1,Speed_2:%.2f,%.2f\n", motor_speed[0].now_vel, motor_speed[1].now_vel);
+    printf("Speed_1,Speed_2,pos_out:%.2f,%.2f,%.2f\n", motor_speed[0].now_vel, motor_speed[1].now_vel,motor_pid[0].pos_out);
   }
 
   else if (htim->Instance == TIM5) // 10ms  改变pid数值并进行pid环计算输出值 

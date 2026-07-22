@@ -49,6 +49,7 @@ Bsp/Src/hwt.c \
 Bsp/Src/lcd_fonts.c \
 Bsp/Src/lcd_spi_200.c \
 App/Src/motor.c \
+App/Src/gray.c \
 App/Src/init.c \
 App/Src/key.c \
 App/Src/gimbal.c \
