@@ -32,6 +32,7 @@
 // app
 #include "init.h"
 #include "key.h"
+#include "gray.h"
 
 // bsp
 #include "motor.h"
@@ -75,13 +76,14 @@ void MX_FREERTOS_Init(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
-uint8_t RxData; /*用于�??启hwt中断回调*/
-// float PID_K[3]={0.0,0.5,0.0};/*pid数组初始定义*/
+uint8_t RxData; 
 // float PID_K[3]={15.0,0.2,0.0};
 // float PID_K[3] = {10.0, 0.5, 0.0};
-float PID_K[3] = {10.0, 2.0, 0.0};
 
-/*串口�??�??*/
+// float PID_K[3] = {10.0, 2.0, 0.0};/*now_use*/
+/*位置环*/
+float PID_K[3] = {15.0, 0.0, 20.0};
+
 int _write(int file, char *ptr, int len)
 {
   HAL_UART_Transmit(&huart3, (uint8_t *)ptr, len, HAL_MAX_DELAY);
@@ -133,21 +135,24 @@ int main(void)
   MX_TIM5_Init();
   MX_TIM6_Init();
   /* USER CODE BEGIN 2 */
-
-  Tim_Init();     /*�??启pwm，encoder，定时器*/
+ 
+  Tim_Init();     /*�?????启pwm，encoder，定时器*/
   Motor_Init();   /*4500占空比，双极性，使能*/
   SPI_LCD_Init(); /*lcd屏幕启动*/
-  /*�??启第�??个motor的pid�??*/
-  PidInit(&motor_pid[0], POSITION_PID, 4500, 3000, 0.0f, PID_K[0], PID_K[1], PID_K[2]);
-  PidInit(&motor_pid[1], POSITION_PID, 4500, 3000, 0.0f, PID_K[0], PID_K[1], PID_K[2]);
+  /*�?????启第�?????个motor的pid�?????*/
+  PidInit(&motor_pid[0], POSITION_PID, 4500, 3000, 0.0f, 10.0, 2.0,0.0);
+  PidInit(&motor_pid[1], POSITION_PID, 4500, 3000, 0.0f, 10.0, 2.0,0.0);
   motor_speed[0].target_vel = 0.0;
   motor_speed[1].target_vel = 0.0;
+  PidInit(&gray_pid, POSITION_PID, 200, 20,0, PID_K[0], PID_K[1], PID_K[2]);
+
 
   /*按键*/
   key();
 
-  /*进入hwt串口中断回调*/
-  HAL_UART_Receive_IT(&huart3, &RxData, 1);
+  /*hwt*/
+  hwt_Init();
+  
   /* USER CODE END 2 */
 
   /* Init scheduler */
@@ -223,7 +228,7 @@ void SystemClock_Config(void)
 
 /* USER CODE BEGIN 4 */
 
-/*usart中断回调�??3->vofa�??1-> hwt  */
+/*usart中断回调�?????3->vofa�?????1-> hwt  */
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
 
@@ -235,10 +240,10 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
       Wait_Head,           // 等待包头
       Wait_Flag,           // 等待接收标识
       Wait_Data            // 等待接收数据
-    } RxState = Wait_Head; // 初始状�?�为等待�??????
+    } RxState = Wait_Head; // 初始状�?�为等待�?????????
 
     static enum {
-      CMD_NONE,              // 空状�??????
+      CMD_NONE,              // 空状�?????????
       CMD_Kp,                // Kp
       CMD_Ki,                // Ki
       CMD_Kd                 // Kd
@@ -369,7 +374,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
       break;
     }
 
-    LCD_DisplayDecimals(10, 10, yaw, 6, 2);
+    // LCD_DisplayDecimals(10, 10, yaw, 6, 2);
     HAL_UART_Receive_IT(&huart1, &rx_byte, 1);
   }
 }
@@ -400,22 +405,39 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   }
   else if (htim->Instance == TIM9) // 10ms   编码器计算并vofa
   {
+    static int counter =0;
+    counter++;
+    gray_pid.p = PID_K[0];
+    gray_pid.i = PID_K[1];
+    gray_pid.d = PID_K[2];
+    get_error(&error);
+    float vel_diff = PidCalc(&gray_pid, error, 0);
+    if (counter == 3)
+    {
+      // get_error(&error);
+      // float vel_diff = PidCalc(&gray_pid, error, 0);
+      motor_speed[0].target_vel = Speed_base + vel_diff;
+      motor_speed[1].target_vel = Speed_base - vel_diff;
+      counter=0;
+    }
+
     Get_Motor_Speed(&motor_speed[0].now_vel, &htim2);
     Get_Motor_Speed(&motor_speed[1].now_vel, &htim3);
     motor_speed[0].now_vel = moveAverageFilter_Update(&speed_filter[0], motor_speed[0].now_vel);
     motor_speed[1].now_vel = moveAverageFilter_Update(&speed_filter[1], motor_speed[1].now_vel);
     speed_update_flag = 1;
     // printf("Speed_1,Speed_2,pos_out:%.2f,%.2f,%.2f\n", motor_speed[0].now_vel, motor_speed[1].now_vel, motor_pid[0].pos_out);
-    motor_pid[0].p = PID_K[0];
-    motor_pid[0].i = PID_K[1];
-    motor_pid[0].d = PID_K[2];
-    motor_pid[1].p = PID_K[0];
-    motor_pid[1].i = PID_K[1];
-    motor_pid[1].d = PID_K[2];
+    // motor_pid[0].p = PID_K[0];
+    // motor_pid[0].i = PID_K[1];
+    // motor_pid[0].d = PID_K[2];
+    // motor_pid[1].p = PID_K[0];
+    // motor_pid[1].i = PID_K[1];
+    // motor_pid[1].d = PID_K[2];
     float pid_output_1 = PidCalc(&motor_pid[0], motor_speed[0].now_vel, motor_speed[0].target_vel);
     float pid_output_2 = PidCalc(&motor_pid[1], motor_speed[1].now_vel, motor_speed[1].target_vel);
     Motor_Set_Vel_1((int16_t)pid_output_1);
     Motor_Set_Vel_2((int16_t)pid_output_2);
+
   }
 
   else if (htim->Instance == TIM5) // 10ms
@@ -423,7 +445,9 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     if (speed_update_flag == 1)
     {
       speed_update_flag = 0;
-      printf("Speed_1,Speed_2,pos_out:%.2f,%.2f,%.2f\n", motor_speed[0].now_vel, motor_speed[1].now_vel, motor_pid[0].pos_out);
+      // printf("Speed_1,Speed_2,pos_out:%.2f,%.2f,%.2f\n", motor_speed[0].now_vel, motor_speed[1].now_vel, motor_pid[0].pos_out);
+      // printf("Speed_1_t,Speed_2_t:%.2f,%.2f\n", motor_speed[0].target_vel, motor_speed[1].target_vel);
+      printf("yaw:%.2f\n", yaw);
     }
     // motor_pid[0].i = PID_K[1];
     // motor_pid[0].d = PID_K[2];

@@ -9,6 +9,7 @@
 void Tim_Init(void);
 
 extern Pid_t motor_pid[2];
+extern Pid_t gray_pid;
 extern MoveAverageFilter speed_filter[2];
 
 #endif // !INIT_H

@@ -12,6 +12,7 @@ void Tim_Init(void)
     //* Encoder
     HAL_TIM_Encoder_Start(&htim2, TIM_CHANNEL_ALL);
     HAL_TIM_Encoder_Start(&htim3, TIM_CHANNEL_ALL);
+
     HAL_TIM_Base_Start_IT(&htim2);
     HAL_TIM_Base_Start_IT(&htim3);
     HAL_TIM_Base_Start_IT(&htim4);
@@ -21,5 +22,6 @@ void Tim_Init(void)
 }
 
 Pid_t motor_pid[2]; /*1,2电机速度环pid参数源头*/
+Pid_t gray_pid;
 
 MoveAverageFilter speed_filter[2];
