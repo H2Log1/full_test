@@ -30,7 +30,7 @@ void btn1_single_click_handler(Button *btn, void *user_data)
 void btn2_single_click_handler(Button *btn, void *user_data)
 {
     motor_speed[0].target_vel = 50.0;
-    motor_speed[1].target_vel = 15.0;
+    motor_speed[1].target_vel = 50.0;
     HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_3);
 }
 
@@ -44,7 +44,7 @@ void btn3_single_click_handler(Button *btn, void *user_data)
 void btn4_single_click_handler(Button *btn, void *user_data)
 {
     motor_speed[0].target_vel = 300.0;
-    motor_speed[1].target_vel = 500.0;
+    motor_speed[1].target_vel = 300.0;
     HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_5);
 }
 

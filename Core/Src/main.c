@@ -75,13 +75,13 @@ void MX_FREERTOS_Init(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
-uint8_t RxData; /*用于�?启hwt中断回调*/
+uint8_t RxData; /*用于�??启hwt中断回调*/
 // float PID_K[3]={0.0,0.5,0.0};/*pid数组初始定义*/
 // float PID_K[3]={15.0,0.2,0.0};
 // float PID_K[3] = {10.0, 0.5, 0.0};
 float PID_K[3] = {10.0, 2.0, 0.0};
 
-/*串口发?函?*/
+/*串口�??�??*/
 int _write(int file, char *ptr, int len)
 {
   HAL_UART_Transmit(&huart3, (uint8_t *)ptr, len, HAL_MAX_DELAY);
@@ -91,9 +91,9 @@ int _write(int file, char *ptr, int len)
 /* USER CODE END 0 */
 
 /**
- * @brief  The application entry point.
- * @retval int
- */
+  * @brief  The application entry point.
+  * @retval int
+  */
 int main(void)
 {
   /* USER CODE BEGIN 1 */
@@ -134,14 +134,14 @@ int main(void)
   MX_TIM6_Init();
   /* USER CODE BEGIN 2 */
 
-  Tim_Init();     /*�?启pwm，encoder，定时器*/
+  Tim_Init();     /*�??启pwm，encoder，定时器*/
   Motor_Init();   /*4500占空比，双极性，使能*/
   SPI_LCD_Init(); /*lcd屏幕启动*/
-  /*�?启第�?个motor的pid�?*/
+  /*�??启第�??个motor的pid�??*/
   PidInit(&motor_pid[0], POSITION_PID, 4500, 3000, 0.0f, PID_K[0], PID_K[1], PID_K[2]);
   PidInit(&motor_pid[1], POSITION_PID, 4500, 3000, 0.0f, PID_K[0], PID_K[1], PID_K[2]);
-  motor_speed[0].target_vel = 300.0;
-  motor_speed[1].target_vel = 100.0;
+  motor_speed[0].target_vel = 0.0;
+  motor_speed[1].target_vel = 0.0;
 
   /*按键*/
   key();
@@ -151,7 +151,7 @@ int main(void)
   /* USER CODE END 2 */
 
   /* Init scheduler */
-  osKernelInitialize(); /* Call init function for freertos objects (in freertos.c) */
+  osKernelInitialize();  /* Call init function for freertos objects (in freertos.c) */
   MX_FREERTOS_Init();
 
   /* Start scheduler */
@@ -170,22 +170,22 @@ int main(void)
 }
 
 /**
- * @brief System Clock Configuration
- * @retval None
- */
+  * @brief System Clock Configuration
+  * @retval None
+  */
 void SystemClock_Config(void)
 {
   RCC_OscInitTypeDef RCC_OscInitStruct = {0};
   RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
 
   /** Configure the main internal regulator output voltage
-   */
+  */
   __HAL_RCC_PWR_CLK_ENABLE();
   __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
 
   /** Initializes the RCC Oscillators according to the specified parameters
-   * in the RCC_OscInitTypeDef structure.
-   */
+  * in the RCC_OscInitTypeDef structure.
+  */
   RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
   RCC_OscInitStruct.HSEState = RCC_HSE_BYPASS;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
@@ -200,15 +200,16 @@ void SystemClock_Config(void)
   }
 
   /** Activate the Over-Drive mode
-   */
+  */
   if (HAL_PWREx_EnableOverDrive() != HAL_OK)
   {
     Error_Handler();
   }
 
   /** Initializes the CPU, AHB and APB buses clocks
-   */
-  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
+  */
+  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
+                              |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
   RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
   RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
   RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV4;
@@ -222,7 +223,7 @@ void SystemClock_Config(void)
 
 /* USER CODE BEGIN 4 */
 
-/*usart中断回调�?3->vofa�?1-> hwt  */
+/*usart中断回调�??3->vofa�??1-> hwt  */
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
 
@@ -234,10 +235,10 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
       Wait_Head,           // 等待包头
       Wait_Flag,           // 等待接收标识
       Wait_Data            // 等待接收数据
-    } RxState = Wait_Head; // 初始状�?�为等待�?????
+    } RxState = Wait_Head; // 初始状�?�为等待�??????
 
     static enum {
-      CMD_NONE,              // 空状�?????
+      CMD_NONE,              // 空状�??????
       CMD_Kp,                // Kp
       CMD_Ki,                // Ki
       CMD_Kd                 // Kd
@@ -377,20 +378,19 @@ volatile uint8_t speed_update_flag = 0;
 /* USER CODE END 4 */
 
 /**
- * @brief  Period elapsed callback in non blocking mode
- * @note   This function is called  when TIM7 interrupt took place, inside
- * HAL_TIM_IRQHandler(). It makes a direct call to HAL_IncTick() to increment
- * a global variable "uwTick" used as application time base.
- * @param  htim : TIM handle
- * @retval None
- */
+  * @brief  Period elapsed callback in non blocking mode
+  * @note   This function is called  when TIM7 interrupt took place, inside
+  * HAL_TIM_IRQHandler(). It makes a direct call to HAL_IncTick() to increment
+  * a global variable "uwTick" used as application time base.
+  * @param  htim : TIM handle
+  * @retval None
+  */
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
   /* USER CODE BEGIN Callback 0 */
 
   /* USER CODE END Callback 0 */
-  if (htim->Instance == TIM7)
-  {
+  if (htim->Instance == TIM7) {
     HAL_IncTick();
   }
   /* USER CODE BEGIN Callback 1 */
@@ -440,9 +440,9 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 }
 
 /**
- * @brief  This function is executed in case of error occurrence.
- * @retval None
- */
+  * @brief  This function is executed in case of error occurrence.
+  * @retval None
+  */
 void Error_Handler(void)
 {
   /* USER CODE BEGIN Error_Handler_Debug */
@@ -454,14 +454,14 @@ void Error_Handler(void)
   /* USER CODE END Error_Handler_Debug */
 }
 
-#ifdef USE_FULL_ASSERT
+#ifdef  USE_FULL_ASSERT
 /**
- * @brief  Reports the name of the source file and the source line number
- *         where the assert_param error has occurred.
- * @param  file: pointer to the source file name
- * @param  line: assert_param error line source number
- * @retval None
- */
+  * @brief  Reports the name of the source file and the source line number
+  *         where the assert_param error has occurred.
+  * @param  file: pointer to the source file name
+  * @param  line: assert_param error line source number
+  * @retval None
+  */
 void assert_failed(uint8_t *file, uint32_t line)
 {
   /* USER CODE BEGIN 6 */
